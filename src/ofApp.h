@@ -5,7 +5,39 @@
 #include  "ofxAssimpModelLoader.h"
 #include "Octree.h"
 
+class physicsModel {
+public:
+	glm::vec3 velocity = glm::vec3(0, 0, 0);
+	glm::vec3 acceleration = glm::vec3(0, 0, 0);
+	glm::vec3 force = glm::vec3(0, 0, 0);
+	float angularVel = 0;
+	float angularAccel = 0;
+	float mass = 1.0;
+	float damping = .99;
+	ofxAssimpModelLoader model;
 
+	void integrate() {
+		float dt = 1.0 / ofGetFrameRate();
+		glm::vec3 currPos = model.getPosition();
+		currPos += (velocity * dt);
+		model.setPosition(currPos.x, currPos.y, currPos.z);
+		glm::vec3 accel = acceleration;
+		accel += (force * 1.0 / mass);
+		velocity += accel * dt;
+		velocity *= damping;
+
+		//angular stuff
+		float currRot = model.getRotationAngle(0);
+		currRot += (angularVel * dt);
+		angularVel += angularAccel * dt;
+		angularVel *= damping;
+
+
+		// reset all forces
+		angularAccel = 0;
+		force = glm::vec3(0, 0, 0);
+	}
+};
 
 class ofApp : public ofBaseApp{
 
@@ -38,7 +70,8 @@ class ofApp : public ofBaseApp{
 		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 
 		ofEasyCam cam;
-		ofxAssimpModelLoader mars, lander;
+		ofxAssimpModelLoader mars;
+		physicsModel lander;
 		ofLight light;
 		Box boundingBox, landerBounds;
 		Box testBox;
