@@ -4,6 +4,7 @@
 #include "ofxGui.h"
 #include  "ofxAssimpModelLoader.h"
 #include "Octree.h"
+#include <cmath>
 
 class physicsModel {
 public:
@@ -12,8 +13,10 @@ public:
 	glm::vec3 force = glm::vec3(0, 0, 0);
 	float angularVel = 0;
 	float angularAccel = 0;
+	float angularForce = 0;
 	float mass = 1.0;
 	float damping = .99;
+	float angle = 0;
 	ofxAssimpModelLoader model;
 
 	void integrate() {
@@ -21,20 +24,21 @@ public:
 		glm::vec3 currPos = model.getPosition();
 		currPos += (velocity * dt);
 		model.setPosition(currPos.x, currPos.y, currPos.z);
-		glm::vec3 accel = acceleration;
-		accel += (force * 1.0 / mass);
-		velocity += accel * dt;
+		acceleration += (force * 1.0 / mass);
+		velocity += acceleration * dt;
 		velocity *= damping;
 
 		//angular stuff
-		float currRot = model.getRotationAngle(0);
-		currRot += (angularVel * dt);
+		angle += (angularVel * dt);
+		angle = fmodf(angle, 360);
+		model.setRotation(0,angle,0,1,0);
+		angularAccel += (angularForce * 1.0 / mass);
 		angularVel += angularAccel * dt;
 		angularVel *= damping;
 
 
 		// reset all forces
-		angularAccel = 0;
+		angularForce = 0;
 		force = glm::vec3(0, 0, 0);
 	}
 };

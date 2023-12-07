@@ -38,8 +38,8 @@ void ofApp::setup(){
 	//
 	initLightingAndMaterials();
 
-	//mars.loadModel("geo/mars-low-5x-v2.obj");
-	mars.loadModel("geo/moon-houdini.obj");
+	mars.loadModel("geo/mars-low-5x-v2.obj");
+	//mars.loadModel("geo/moon-houdini.obj");
 	
 	mars.setScaleNormalization(false);
 
@@ -66,7 +66,15 @@ void ofApp::setup(){
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	
+	if (bLanderLoaded) {
+		//lander.force += glm::vec3(0,.1,0);
+		//lander.angularForce += 1;
+		lander.angle = 0;
+		//glm::vec3 heading = glm::vec3(sin(glm::radians(lander.angle)), 0, -cos(glm::radians(lander.angle)));
+		//lander.force += heading * .1;
+		lander.integrate();
+		//cout << lander.model.getPosition() << "\n";
+	}
 }
 //--------------------------------------------------------------
 void ofApp::draw() {

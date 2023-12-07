@@ -210,6 +210,32 @@ bool Octree::intersect(const Ray &ray, const TreeNode & node, TreeNode & nodeRtn
 	return intersects;
 }
 
+bool Octree::intersect(const Ray& ray, const TreeNode& node, TreeNode& nodeRtn, float& distance) {
+	bool intersects = false;
+
+	if (!node.children.empty()) {
+		for (int i = 0; i < node.children.size(); i++) {
+			if (intersect(ray, node.children[i], nodeRtn, distance)) {
+				return true;
+			}
+		}
+	}
+	else {
+		if (node.box.intersect(ray, 0, 1000)) {
+			nodeRtn = node;
+			intersects = true;
+
+			Vector3 min = node.box.parameters[0];
+			Vector3 max = node.box.parameters[1];
+			Vector3 size = max - min;
+			Vector3 center = size / 2 + min;
+			distance = sqrt(powf(ray.origin.x() - center.x(), 2) + powf(ray.origin.y() - center.y(),2) + powf(ray.origin.z() - center.z(),2));
+		}
+	}
+
+	return intersects;
+}
+
 bool Octree::intersect(const Box &box, TreeNode & node, vector<Box> & boxListRtn) {
 	bool intersects = false;
 
