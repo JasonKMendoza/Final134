@@ -56,12 +56,66 @@ void ofApp::setup(){
 		cout << "No go\n";
 	}
 
-	mars.loadModel("geo/landscape.obj");
+	//mars.loadModel("geo/mars-low-5x-v2.obj");
 	//mars.loadModel("geo/moon-houdini.obj");
-	
+	mars.loadModel("geo/landscape.obj");
+	skybox.loadModel("geo/skybox.obj");
 
 	
 	mars.setScaleNormalization(false);
+	skybox.setScaleNormalization(false);
+
+
+	// Lighting setup
+	light1.setPointLight();
+	light1.setPosition(-10, 25, -150);
+	light1.setDiffuseColor(ofColor::orange);
+	light1.setAttenuation(1.0, 0.0, 0.001);
+	light1.enable();
+
+	light2.setPointLight();
+	light2.setPosition(0, 25, -100);
+	light2.setDiffuseColor(ofColor::white);
+	light2.setAttenuation(1.0, 0.0, 0.001);
+	light2.enable();
+
+	light3.setPointLight();
+	light3.setPosition(0, 25, -50);
+	light3.setDiffuseColor(ofColor::orange);
+	light3.setAttenuation(1.0, 0.0, 0.001);
+	light3.enable();
+
+	light4.setPointLight();
+	light4.setPosition(10, 25, 0);
+	light4.setDiffuseColor(ofColor::white);
+	light4.setAttenuation(1.0, 0.0, 0.001);
+	light4.enable();
+
+	light5.setPointLight();
+	light5.setPosition(-10, 25, 50);
+	light5.setDiffuseColor(ofColor::orange);
+	light5.setAttenuation(1.0, 0.0, 0.001);
+	light5.enable();
+
+	light6.setPointLight();
+	light6.setPosition(-30, 25, 100);
+	light6.setDiffuseColor(ofColor::white);
+	light6.setAttenuation(1.0, 0.0, 0.001);
+	light6.enable();
+
+	light7.setPointLight();
+	light7.setPosition(-20, 25, 150);
+	light7.setDiffuseColor(ofColor::orange);
+	light7.setAttenuation(1.0, 0.0, 0.001);
+	light7.enable();
+
+	lights.push_back(light1);
+	lights.push_back(light2);
+	lights.push_back(light3);
+	lights.push_back(light4);
+	lights.push_back(light5);
+	lights.push_back(light6);
+	lights.push_back(light7);
 
 	// create sliders for testing
 	//
@@ -121,6 +175,22 @@ void ofApp::draw() {
 	else {
 		ofEnableLighting();              // shaded mode
 		mars.drawFaces();
+		skybox.drawFaces();
+
+		// marked landing zones
+		ofFill();
+		ofSetColor(ofColor::cyan);
+		ofDrawSphere(glm::vec3(57.6471, 17.7934, -38.8235), 5.0); // 1
+		ofDrawSphere(glm::vec3(-74.7059, 17.9984,-108.235), 5.0); // 2
+		ofDrawSphere(glm::vec3(26.4706, 18.111, 99.4118), 5.0); // 3
+
+		// preview light positions
+		//for (ofLight l : lights) {
+		//	ofSetColor(l.getDiffuseColor());
+		//	ofDrawSphere(l.getPosition(), 1);
+		//}
+
+		ofSetColor(ofColor::white);
 		lander.model.drawFaces();
 		ofMesh mesh;
 		if (true) {
@@ -406,6 +476,9 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 
 	if (pointSelected) {
 		pointRet = octree.mesh.getVertex(selectedNode.points[0]);
+
+		// used for determining landing zone locations
+		//cout << pointRet.x << ", " << pointRet.y << ", " << pointRet.z << "\n";
 	}
 	return pointSelected;
 }
