@@ -23,7 +23,6 @@ void ofApp::setup(){
 	bDisplayPoints = false;
 	bAltKeyDown = false;
 	bCtrlKeyDown = false;
-	bLanderLoaded = false;
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
 	cam.setDistance(10);
@@ -38,8 +37,29 @@ void ofApp::setup(){
 	//
 	initLightingAndMaterials();
 
+	if (lander.model.loadModel("geo/lander.obj")) {
+		lander.model.setScaleNormalization(false);
+		lander.model.setPosition(10, 10, 10);
+		cam.setPosition(9,9,9);
+		cout << "number of meshes: " << lander.model.getNumMeshes() << endl;
+		bboxList.clear();
+		for (int i = 0; i < lander.model.getMeshCount(); i++) {
+			bboxList.push_back(Octree::meshBounds(lander.model.getMesh(i)));
+		}
+
+		glm::vec3 min = lander.model.getSceneMin();
+		glm::vec3 max = lander.model.getSceneMax();
+		float offset = (max.y - min.y) / 2.0;
+		landerBounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
+	}
+	else {
+		cout << "No go\n";
+	}
+
 	mars.loadModel("geo/mars-low-5x-v2.obj");
 	//mars.loadModel("geo/moon-houdini.obj");
+	
+
 	
 	mars.setScaleNormalization(false);
 
@@ -59,20 +79,22 @@ void ofApp::setup(){
 	cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
 
 	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
-
+	
+	
+	
 }
  
 //--------------------------------------------------------------
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	if (bLanderLoaded) {
+	if (true) {
 		//lander.force += glm::vec3(0,.1,0);
 		//lander.angularForce += 1;
 		lander.angle = 0;
 		//glm::vec3 heading = glm::vec3(sin(glm::radians(lander.angle)), 0, -cos(glm::radians(lander.angle)));
 		//lander.force += heading * .1;
-		lander.integrate();
+		//lander.integrate();
 		//cout << lander.model.getPosition() << "\n";
 	}
 }
@@ -90,7 +112,7 @@ void ofApp::draw() {
 		ofDisableLighting();
 		ofSetColor(ofColor::slateGray);
 		mars.drawWireframe();
-		if (bLanderLoaded) {
+		if (true) {
 			lander.model.drawWireframe();
 			if (!bTerrainSelected) drawAxis(lander.model.getPosition());
 		}
@@ -99,9 +121,10 @@ void ofApp::draw() {
 	else {
 		ofEnableLighting();              // shaded mode
 		mars.drawFaces();
+		lander.model.drawFaces();
 		ofMesh mesh;
-		if (bLanderLoaded) {
-			lander.model.drawFaces();
+		if (true) {
+			//lander.model.drawFaces();
 			if (!bTerrainSelected) drawAxis(lander.model.getPosition());
 			if (bDisplayBBoxes) {
 				ofNoFill();
@@ -176,9 +199,12 @@ void ofApp::draw() {
 	//
 	if (pointSelected) {
 		ofVec3f p = octree.mesh.getVertex(selectedNode.points[0]);
+		lander.model.setPosition(p.x, p.y,p.z);
+		/*
 		ofVec3f d = p - cam.getPosition();
 		ofSetColor(ofColor::lightGreen);
 		ofDrawSphere(p, .02 * d.length());
+		*/
 	}
 
 	ofPopMatrix();
@@ -339,7 +365,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 	// if rover is loaded, test for selection
 	//
-	if (bLanderLoaded) {
+	if (true) {
 		glm::vec3 origin = cam.getPosition();
 		glm::vec3 mouseWorld = cam.screenToWorld(glm::vec3(mouseX, mouseY, 0));
 		glm::vec3 mouseDir = glm::normalize(mouseWorld - origin);
@@ -509,7 +535,7 @@ void ofApp::savePicture() {
 	picture.save("screenshot.png");
 	cout << "picture saved" << endl;
 }
-
+/*
 //--------------------------------------------------------------
 //
 // support drag-and-drop of model (.obj) file loading.  when
@@ -525,7 +551,6 @@ void ofApp::dragEvent2(ofDragInfo dragInfo) {
 	//	lander.model.setPosition(point.x, point.y, point.z);
 		lander.model.setPosition(1, 1, 0);
 
-		bLanderLoaded = true;
 		for (int i = 0; i < lander.model.getMeshCount(); i++) {
 			bboxList.push_back(Octree::meshBounds(lander.model.getMesh(i)));
 		}
@@ -534,7 +559,7 @@ void ofApp::dragEvent2(ofDragInfo dragInfo) {
 	}
 	else cout << "Error: Can't load model" << dragInfo.files[0] << endl;
 }
-
+*/
 bool ofApp::mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point) {
 	ofVec2f mouse(mouseX, mouseY);
 	ofVec3f rayPoint = cam.screenToWorld(glm::vec3(mouseX, mouseY, 0));
@@ -549,8 +574,8 @@ bool ofApp::mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &
 // model is dropped in viewport, place origin under cursor
 //
 void ofApp::dragEvent(ofDragInfo dragInfo) {
+	/*
 	if (lander.model.loadModel(dragInfo.files[0])) {
-		bLanderLoaded = true;
 		lander.model.setScaleNormalization(false);
 		lander.model.setPosition(0, 0, 0);
 		cout << "number of meshes: " << lander.model.getNumMeshes() << endl;
@@ -599,7 +624,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 		}
 	}
 
-
+	*/
 }
 
 //  intersect the mouse ray with the plane normal to the camera 

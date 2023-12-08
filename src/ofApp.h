@@ -80,7 +80,7 @@ class ofApp : public ofBaseApp{
 		Box boundingBox, landerBounds;
 		Box testBox;
 		vector<Box> colBoxList;
-		bool bLanderSelected = false;
+		bool bLanderSelected = true;
 		Octree octree;
 		TreeNode selectedNode;
 		glm::vec3 mouseDownPos, mouseLastPos;
@@ -101,7 +101,7 @@ class ofApp : public ofBaseApp{
 		bool bDisplayOctree = false;
 		bool bDisplayBBoxes = false;
 		
-		bool bLanderLoaded;
+		//bool true;
 		bool bTerrainSelected;
 	
 		ofVec3f selectedPoint;
