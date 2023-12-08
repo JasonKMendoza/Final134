@@ -121,6 +121,15 @@ void ofApp::draw() {
 	else {
 		ofEnableLighting();              // shaded mode
 		mars.drawFaces();
+
+		// marked landing zones
+		ofFill();
+		ofSetColor(ofColor::cyan);
+		ofDrawSphere(glm::vec3(57.6471, 17.7934, -38.8235), 5.0); // 1
+		ofDrawSphere(glm::vec3(-74.7059, 17.9984,-108.235), 5.0); // 2
+		ofDrawSphere(glm::vec3(26.4706, 18.111, 99.4118), 5.0); // 3
+
+		ofSetColor(ofColor::white);
 		lander.model.drawFaces();
 		ofMesh mesh;
 		if (true) {
@@ -406,6 +415,9 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 
 	if (pointSelected) {
 		pointRet = octree.mesh.getVertex(selectedNode.points[0]);
+
+		// used for determining landing zone locations
+		//cout << pointRet.x << ", " << pointRet.y << ", " << pointRet.z << "\n";
 	}
 	return pointSelected;
 }
