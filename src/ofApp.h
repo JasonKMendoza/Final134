@@ -74,9 +74,9 @@ class ofApp : public ofBaseApp{
 		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 
 		ofEasyCam cam;
+		ofxAssimpModelLoader skybox;
 		ofxAssimpModelLoader mars;
 		physicsModel lander;
-		ofLight light;
 		Box boundingBox, landerBounds;
 		Box testBox;
 		vector<Box> colBoxList;
@@ -86,6 +86,15 @@ class ofApp : public ofBaseApp{
 		glm::vec3 mouseDownPos, mouseLastPos;
 		bool bInDrag = false;
 
+		// Lighting
+		vector<ofLight> lights;
+		ofLight light1;
+		ofLight light2;
+		ofLight light3;
+		ofLight light4;
+		ofLight light5;
+		ofLight light6;
+		ofLight light7;
 
 		ofxIntSlider numLevels;
 		ofxPanel gui;
