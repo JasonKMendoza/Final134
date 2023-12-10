@@ -18,7 +18,8 @@ Particle::Particle() {
 }
 
 void Particle::draw() {
-	ofSetColor(color);
+	//	ofSetColor(color);
+	ofSetColor(ofMap(age(), 0, lifespan, 255, 10), 0, 0);
 	ofDrawSphere(position, radius);
 }
 
@@ -56,5 +57,3 @@ void Particle::integrate() {
 float Particle::age() {
 	return (ofGetElapsedTimeMillis() - birthtime) / 1000.0;
 }
-
-
