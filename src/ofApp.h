@@ -126,6 +126,7 @@ class ofApp : public ofBaseApp{
 		bool bDisplayLeafNodes = false;
 		bool bDisplayOctree = false;
 		bool bDisplayBBoxes = false;
+		bool touchDown = false;
 
 		bool bThrustEmit = false;
 

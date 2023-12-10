@@ -173,7 +173,9 @@ void ofApp::setup(){
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	lander.force += glm::vec3(0,.1,0);
+	if (!touchDown) {
+		lander.force += glm::vec3(0, -.1, 0);
+	}
 	//lander.angularForce += 1;
 	//lander.angle = 0;
 	ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
@@ -201,8 +203,10 @@ void ofApp::update() {
 	colBoxList.clear();
 	octree.intersect(bounds, octree.root, colBoxList);
 
-	if (colBoxList.size() > 1) {
-		//cout << "touch\n";
+	if (colBoxList.size() > 10) {
+		cout << "touchdown\n";
+		touchDown = true;
+		lander.velocity = glm::vec3(0,0,0);
 		//lander.force += glm::vec3(0, .1, 0);
 	}
 	
@@ -433,7 +437,7 @@ void ofApp::keyPressed(int key) {
 	case 'V':
 		break;
 	case ' ':
-		lander.force += lander.heading * glm::vec3(0, 1, 0);
+		lander.force += glm::vec3(0, 1, 0);
 		bThrustEmit = true;
 		break;
 	case 'w':
