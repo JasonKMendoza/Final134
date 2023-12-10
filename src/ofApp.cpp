@@ -43,7 +43,7 @@ void ofApp::setup(){
 	//
 	initLightingAndMaterials();
 
-	if (lander.model.loadModel("geo/lander.obj")) {
+	if (lander.model.loadModel("geo/rocket.obj")) {
 		lander.model.setScaleNormalization(false);
 		lander.model.setPosition(9, 9, 9);
 		cam.setPosition(10, 10, 10);
