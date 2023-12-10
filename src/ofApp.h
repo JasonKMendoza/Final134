@@ -19,6 +19,7 @@ public:
 	float mass = 1.0;
 	float damping = .80;
 	float angle = 0;
+	float speed = 0;
 	ofxAssimpModelLoader model;
 	glm::vec3 heading;
 
@@ -43,6 +44,7 @@ public:
 		// reset all forces
 		angularForce = 0;
 		force = glm::vec3(0, 0, 0);
+		speed = sqrt(powf(velocity.x, 2) + powf(velocity.y, 2) + powf(velocity.z, 2));
 	}
 };
 
