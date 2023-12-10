@@ -173,7 +173,7 @@ void ofApp::setup(){
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	//lander.force += glm::vec3(0,.1,0);
+	lander.force += glm::vec3(0,.1,0);
 	//lander.angularForce += 1;
 	//lander.angle = 0;
 	ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
@@ -433,6 +433,7 @@ void ofApp::keyPressed(int key) {
 	case 'V':
 		break;
 	case ' ':
+		lander.force += lander.heading * glm::vec3(0, 1, 0);
 		bThrustEmit = true;
 		break;
 	case 'w':
@@ -457,32 +458,43 @@ void ofApp::keyPressed(int key) {
 		break;
 	case OF_KEY_F3:
 		theCam = &mountedCam;
-	case OF_KEY_LEFT:   // turn left
+		break;
+	case OF_KEY_LEFT:   // move left
 	{
 		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
-		lander.force += rightVector * glm::vec3(-1, 0, -1);
+		lander.force += rightVector * glm::vec3(-1, 0, 0);
 		break;
 	}
-	case OF_KEY_RIGHT:  // turn right
+	case OF_KEY_RIGHT:  // move right
 	{
 		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
-		lander.force += rightVector * glm::vec3(1, 0, 1);
+		lander.force += rightVector * glm::vec3(1, 0, 0);
 		break;
 	}
 	case OF_KEY_UP:     // go forward
-		lander.force += lander.heading * glm::vec3(0, 1, 0);
+	{
+		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
+		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
+		rightVector.normalize();
+		lander.force += rightVector * glm::vec3(0, 1, 0);
 		break;
+	}
 	case OF_KEY_DOWN:   // go backward
-		lander.force += lander.heading * glm::vec3(0, -1, 0);
+	{
+		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
+		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
+		rightVector.normalize();
+		lander.force += rightVector * glm::vec3(0, -1, 0);
 		break;
-	case 'e':
+	}
+	case 'e': //turn right
 		lander.angularForce += 50;
 		break;
-	case 'q':
+	case 'q': //turn left
 		lander.angularForce += -50;
 		break;
 	case 'z':
