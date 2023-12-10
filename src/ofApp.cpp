@@ -26,6 +26,13 @@ void ofApp::setup(){
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
 
+	theCam = &cam;
+
+	mountedCam.setNearClip(.1);
+
+	trackingCam.setNearClip(.1);
+	trackingCam.setPosition(0, 40, 0);
+
 	//Loading Font
 	verdana20.load("verdana.ttf", 20, true, true);
 	verdana20.setLineHeight(24.0f);
@@ -75,7 +82,7 @@ void ofApp::setup(){
 	// Lighting setup
 	light1.setPointLight();
 	light1.setPosition(-10, 25, -150);
-	light1.setDiffuseColor(ofColor::orange);
+	light1.setDiffuseColor(ofColor::white);
 	light1.setAttenuation(1.0, 0.0, 0.001);
 	light1.enable();
 
@@ -87,7 +94,7 @@ void ofApp::setup(){
 
 	light3.setPointLight();
 	light3.setPosition(0, 25, -50);
-	light3.setDiffuseColor(ofColor::orange);
+	light3.setDiffuseColor(ofColor::white);
 	light3.setAttenuation(1.0, 0.0, 0.001);
 	light3.enable();
 
@@ -99,7 +106,7 @@ void ofApp::setup(){
 
 	light5.setPointLight();
 	light5.setPosition(-10, 25, 50);
-	light5.setDiffuseColor(ofColor::orange);
+	light5.setDiffuseColor(ofColor::white);
 	light5.setAttenuation(1.0, 0.0, 0.001);
 	light5.enable();
 
@@ -111,7 +118,7 @@ void ofApp::setup(){
 
 	light7.setPointLight();
 	light7.setPosition(-20, 25, 150);
-	light7.setDiffuseColor(ofColor::orange);
+	light7.setDiffuseColor(ofColor::white);
 	light7.setAttenuation(1.0, 0.0, 0.001);
 	light7.enable();
 
@@ -127,6 +134,16 @@ void ofApp::setup(){
 	//
 	gui.setup();
 	gui.add(numLevels.setup("Number of Octree Levels", 1, 1, 10));
+
+	gui.add(tVelocity.setup("T Velocity", ofVec3f(0, -20, 0), ofVec3f(0, 0, 0), ofVec3f(-100, -100, -100)));
+	gui.add(tLifespan.setup("T Lifespan", 1.0, .1, 10.0));
+	gui.add(tRate.setup("T Rate", 10.0, .5, 60.0));
+	gui.add(tDamping.setup("T Damping", .99, .1, 1.0));
+	gui.add(tGravity.setup("T Gravity", 10, 1, 20));
+	gui.add(tRadius.setup("T Radius", .5, .01, .3));
+	gui.add(tTurbulenceMin.setup("T TurbMin", ofVec3f(-2, -1, -3), ofVec3f(0, 0, 0), ofVec3f(-20, -20, -20)));
+	gui.add(tTurbulenceMax.setup("T TurbMax", ofVec3f(1, 2, 5), ofVec3f(0, 0, 0), ofVec3f(20, 20, 20)));
+
 	bHide = false;
 
 	//  Create Octree for testing.
@@ -141,7 +158,15 @@ void ofApp::setup(){
 	//testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
 	
 	
-	
+	// setup thrustEmitter
+	//
+	thrustEmitter.init();
+	thrustEmitter.start();
+
+	// add some forces to emitter
+	//
+	thrustEmitter.sys->addForce(new GravityForce(ofVec3f(0, -tGravity, 0))); // gravity
+	thrustEmitter.sys->addForce(new TurbulenceForce(ofVec3f(-2, -1, -3), ofVec3f(1, 2, 5))); // turbulence
 }
  
 //--------------------------------------------------------------
@@ -176,6 +201,32 @@ void ofApp::update() {
 		//cout << "touch\n";
 		//lander.force += glm::vec3(0, .1, 0);
 	}
+	
+	// thrust particle emitter
+	thrustEmitter.setLifespan(tLifespan);
+	thrustEmitter.setVelocity(static_cast<ofVec3f>(tVelocity));
+	thrustEmitter.setParticleRadius(tRadius);
+	thrustEmitter.setPosition(lander.model.getPosition());
+	thrustEmitter.update();
+
+	if (bThrustEmit) thrustEmitter.setRate(tRate); else thrustEmitter.setRate(0);
+
+	for (ParticleForce* force : thrustEmitter.sys->forces) {
+		if (dynamic_cast<GravityForce*>(force)) {
+			dynamic_cast<GravityForce*>(force)->set(ofVec3f(0, -tGravity, 0));
+		}
+		else if (dynamic_cast<TurbulenceForce*>(force)) {
+			dynamic_cast<TurbulenceForce*>(force)->set(static_cast<ofVec3f>(tTurbulenceMin), static_cast<ofVec3f>(tTurbulenceMax));
+		}
+	}
+
+	if (theCam == &trackingCam) {
+		theCam->lookAt(lander.model.getPosition());
+	} else if (theCam == &mountedCam) {
+		theCam->lookAt(glm::vec3(1, 0, 0));
+		theCam->setPosition(lander.model.getPosition());
+	}
+
 	if (start) lander.integrate();
 	//cout << lander.angularVel << "\n";
 	//cout << altitude << '\n';
@@ -184,11 +235,7 @@ void ofApp::update() {
 void ofApp::draw() {
 	ofBackground(ofColor::black);
 
-	glDepthMask(false);
-	if (!bHide) gui.draw();
-	glDepthMask(true);
-
-	cam.begin();
+	theCam->begin();
 	ofPushMatrix();
 	if (bWireframe) {                    // wireframe mode  (include axis)
 		ofDisableLighting();
@@ -220,6 +267,10 @@ void ofApp::draw() {
 
 		ofSetColor(ofColor::white);
 		lander.model.drawFaces();
+
+		// thrust particle emitter
+		thrustEmitter.draw();
+
 		ofMesh mesh;
 		if (true) {
 			//lander.model.drawFaces();
@@ -281,7 +332,13 @@ void ofApp::draw() {
 	//
 
 	ofPopMatrix();
-	cam.end();
+  
+	theCam->end();
+
+	glDepthMask(false);
+	if (!bHide) gui.draw();
+	glDepthMask(true);
+
 	ofSetColor(ofColor::white);
 	verdana20.drawString(fuelString, ofGetWidth() - verdana20.stringWidth(fuelString) - 20, 2 * verdana20.stringHeight(fuelString));
 	verdana20.drawString(heightString, ofGetWidth() - verdana20.stringWidth(heightString) - 20, 4 * verdana20.stringHeight(heightString));
@@ -333,6 +390,7 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'H':
 	case 'h':
+		bHide = !bHide;
 		break;
 	case 'L':
 	case 'l':
@@ -376,6 +434,9 @@ void ofApp::keyPressed(int key) {
 	case 'w':
 		toggleWireframeMode();
 		break;
+	case ' ':
+		bThrustEmit = true;
+		break;
 	case OF_KEY_ALT:
 		cam.enableMouseInput();
 		bAltKeyDown = true;
@@ -387,6 +448,14 @@ void ofApp::keyPressed(int key) {
 		break;
 	case OF_KEY_DEL:
 		break;
+	case OF_KEY_F1:
+		theCam = &cam;
+		break;
+	case OF_KEY_F2:
+		theCam = &trackingCam;
+		break;
+	case OF_KEY_F3:
+		theCam = &mountedCam;
 	case OF_KEY_LEFT:   // turn left
 		lander.force += lander.heading * glm::vec3(-100,0,-100);
 		break;
@@ -425,7 +494,9 @@ void ofApp::togglePointsDisplay() {
 void ofApp::keyReleased(int key) {
 
 	switch (key) {
-	
+	case ' ':
+		bThrustEmit = false;
+		break;
 	case OF_KEY_ALT:
 		cam.disableMouseInput();
 		bAltKeyDown = false;
