@@ -428,9 +428,7 @@ void ofApp::keyPressed(int key) {
 	case 'V':
 		break;
 	case ' ':
-		start = !start;
 		bThrustEmit = true;
-		cout << "go\n";
 		break;
 	case 'w':
 		toggleWireframeMode();
@@ -472,6 +470,10 @@ void ofApp::keyPressed(int key) {
 	case 'q':
 		lander.angularForce += -50;
 		break;
+	case 'z':
+		start = !start;
+		break;
+
 	default:
 		break;
 	}
