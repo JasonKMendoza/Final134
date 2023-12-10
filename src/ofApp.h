@@ -82,6 +82,7 @@ class ofApp : public ofBaseApp{
 		ofEasyCam cam;
 		ofCamera trackingCam;
 		ofCamera mountedCam;
+		bool isTarget = false;
 
 		ofxAssimpModelLoader skybox;
 		ofxAssimpModelLoader mars;
