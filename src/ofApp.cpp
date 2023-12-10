@@ -25,6 +25,12 @@ void ofApp::setup(){
 	bCtrlKeyDown = false;
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
+
+	//Loading Font
+	verdana20.load("verdana.ttf", 20, true, true);
+	verdana20.setLineHeight(24.0f);
+	verdana20.setLetterSpacing(1.035);
+
 	cam.setDistance(10);
 	cam.setNearClip(.1);
 	cam.setFov(65.5);   // approx equivalent to 28mm in 35mm format
@@ -149,6 +155,14 @@ void ofApp::update() {
 	//lander.force += lander.heading * .1;
 	
 
+	glm::vec3 temp = lander.model.getPosition();
+	cam.setPosition(temp.x + 10, temp.y + 10, temp.z + 10);
+
+	Vector3 temp2 = Vector3(temp.x, temp.y, temp.z);
+	Ray fromShip = Ray(temp2, Vector3(0, -1, 0));
+	octree.intersect(fromShip, octree.root, altitude);
+	fuelString = "Fuel Remaining: " + to_string(fuel);
+	heightString = "Current Altitude " + to_string(altitude);
 
 	ofVec3f min = lander.model.getSceneMin() + lander.model.getPosition();
 	ofVec3f max = lander.model.getSceneMax() + lander.model.getPosition();
@@ -158,12 +172,6 @@ void ofApp::update() {
 	colBoxList.clear();
 	octree.intersect(bounds, octree.root, colBoxList);
 
-	glm::vec3 temp = lander.model.getPosition();
-	cam.setPosition(temp.x + 10,temp.y + 10,temp.z + 10);
-
-	Vector3 temp2 = Vector3(temp.x,temp.y,temp.z);
-	Ray fromShip = Ray(temp2, Vector3(0,-1,0));
-	octree.intersect(fromShip,octree.root,altitude);
 	if (colBoxList.size() > 1) {
 		//cout << "touch\n";
 		//lander.force += glm::vec3(0, .1, 0);
@@ -250,22 +258,6 @@ void ofApp::draw() {
 	}
 	if (bTerrainSelected) drawAxis(ofVec3f(0, 0, 0));
 
-
-
-	if (bDisplayPoints) {                // display points as an option    
-		glPointSize(3);
-		ofSetColor(ofColor::green);
-		mars.drawVertices();
-	}
-
-	// highlight selected point (draw sphere around selected point)
-	//
-	if (bPointSelected) {
-		ofSetColor(ofColor::blue);
-		ofDrawSphere(selectedPoint, .1);
-	}
-
-
 	// recursively draw octree
 	//
 	ofDisableLighting();
@@ -290,6 +282,9 @@ void ofApp::draw() {
 
 	ofPopMatrix();
 	cam.end();
+	ofSetColor(ofColor::white);
+	verdana20.drawString(fuelString, ofGetWidth() - verdana20.stringWidth(fuelString) - 20, 2 * verdana20.stringHeight(fuelString));
+	verdana20.drawString(heightString, ofGetWidth() - verdana20.stringWidth(heightString) - 20, 4 * verdana20.stringHeight(heightString));
 }
 
 

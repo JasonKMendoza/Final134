@@ -90,6 +90,9 @@ class ofApp : public ofBaseApp{
 		int fuel = 120000;
 		bool explode = false;
 		float altitude = 0;
+		ofTrueTypeFont verdana20;
+		string heightString = "";
+		string fuelString = "";
 
 		// Lighting
 		vector<ofLight> lights;
