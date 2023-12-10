@@ -210,6 +210,7 @@ void ofApp::update() {
 		touchDown = true;
 		if (lander.speed > 10) {
 			explode = true;
+			lander.velocity = glm::vec3(0, 0, 0);
 		}
 		else {
 			lander.velocity = glm::vec3(0, 0, 0);
