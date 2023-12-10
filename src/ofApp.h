@@ -87,6 +87,7 @@ class ofApp : public ofBaseApp{
 
 		ofxAssimpModelLoader skybox;
 		ofxAssimpModelLoader mars;
+		ofxAssimpModelLoader lava;
 		physicsModel lander;
 		Box boundingBox, landerBounds;
 		Box testBox;
@@ -111,9 +112,6 @@ class ofApp : public ofBaseApp{
 		ofLight light2;
 		ofLight light3;
 		ofLight light4;
-		ofLight light5;
-		ofLight light6;
-		ofLight light7;
 
 		ofxIntSlider numLevels;
 		ofxPanel gui;
@@ -161,4 +159,20 @@ class ofApp : public ofBaseApp{
 		ofxFloatSlider tRate;
 		ofxVec3Slider tTurbulenceMin;
 		ofxVec3Slider tTurbulenceMax;
+
+		ParticleEmitter explosionEmitter;
+		TurbulenceForce* turbForce;
+		GravityForce* gravityForce;
+		ImpulseRadialForce* radialForce;
+		ofxFloatSlider radialForceVal;
+		ofxFloatSlider ringHeight;
+		ofxFloatSlider eGravity;
+		ofxFloatSlider eDamping;
+		ofxFloatSlider eRadius;
+		ofxVec3Slider eVelocity;
+		ofxFloatSlider eLifespan;
+		ofxFloatSlider eRate;
+		ofxVec3Slider eTurbulenceMin;
+		ofxVec3Slider eTurbulenceMax;
+		ofxToggle bRadialExplosion;
 };

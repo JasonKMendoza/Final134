@@ -15,6 +15,18 @@ void ParticleSystem::remove(int i) {
 	particles.erase(particles.begin() + i);
 }
 
+void ParticleSystem::setLifespan(float l) {
+	for (int i = 0; i < particles.size(); i++) {
+		particles[i].lifespan = l;
+	}
+}
+
+void ParticleSystem::reset() {
+	for (int i = 0; i < forces.size(); i++) {
+		forces[i]->applied = false;
+	}
+}
+
 void ParticleSystem::update() {
 	// check if empty and just return
 	if (particles.size() == 0) return;
@@ -38,8 +50,17 @@ void ParticleSystem::update() {
 	//
 	for (int i = 0; i < particles.size(); i++) {
 		for (int k = 0; k < forces.size(); k++) {
-			forces[k]->updateForce(&particles[i]);
+			if (!forces[k]->applied)
+				forces[k]->updateForce(&particles[i]);
 		}
+	}
+
+	// update all forces only applied once to "applied"
+	// so they are not applied again.
+	//
+	for (int i = 0; i < forces.size(); i++) {
+		if (forces[i]->applyOnce)
+			forces[i]->applied = true;
 	}
 
 	// integrate all the particles in the store
@@ -51,24 +72,7 @@ void ParticleSystem::update() {
 
 // remove all particlies within "dist" of point (not implemented as yet)
 //
-int ParticleSystem::removeNear(const ofVec3f& point, float dist) {
-	auto it = particles.begin();
-
-	int removedCount = 0;
-
-	while (it != particles.end()) {
-		float distance = it->position.distance(point);
-
-		if (distance < dist) {
-			it = particles.erase(it);
-			removedCount++;
-		} else {
-			++it;
-		}
-	}
-
-	return removedCount;
-}
+int ParticleSystem::removeNear(const ofVec3f& point, float dist) { return 0; }
 
 //  draw the particle cloud
 //
@@ -92,10 +96,6 @@ void GravityForce::updateForce(Particle* particle) {
 	particle->forces += gravity * particle->mass;
 }
 
-void GravityForce::set(ofVec3f g) {
-	gravity = g;
-}
-
 // Turbulence Force Field 
 //
 TurbulenceForce::TurbulenceForce(const ofVec3f& min, const ofVec3f& max) {
@@ -113,7 +113,39 @@ void TurbulenceForce::updateForce(Particle* particle) {
 	particle->forces.z += ofRandom(tmin.z, tmax.z);
 }
 
+// Impulse Radial Force - this is a "one shot" force that
+// eminates radially outward in random directions.
+//
+ImpulseRadialForce::ImpulseRadialForce(float magnitude) {
+	this->magnitude = magnitude;
+	applyOnce = true;
+}
+
+void ImpulseRadialForce::updateForce(Particle* particle) {
+
+	// we basically create a random direction for each particle
+	// the force is only added once after it is triggered.
+	//
+	float clampedHeight = glm::clamp(ofRandom(-1, 1), -height, height);
+
+	ofVec3f dir = ofVec3f(ofRandom(-1, 1), clampedHeight, ofRandom(-1, 1));
+	particle->forces += dir.getNormalized() * magnitude;
+}
+
+void ImpulseRadialForce::set(float m) {
+	magnitude = m;
+}
+
+
+void GravityForce::set(ofVec3f g) {
+	gravity = g;
+}
+
 void TurbulenceForce::set(ofVec3f min, ofVec3f max) {
 	tmin = min;
 	tmax = max;
+}
+
+void ImpulseRadialForce::setHeight(float h) {
+	height = h;
 }
