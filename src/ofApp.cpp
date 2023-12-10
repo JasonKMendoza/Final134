@@ -429,13 +429,11 @@ void ofApp::keyPressed(int key) {
 		break;
 	case ' ':
 		start = !start;
+		bThrustEmit = true;
 		cout << "go\n";
 		break;
 	case 'w':
 		toggleWireframeMode();
-		break;
-	case ' ':
-		bThrustEmit = true;
 		break;
 	case OF_KEY_ALT:
 		cam.enableMouseInput();
