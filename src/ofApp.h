@@ -77,6 +77,7 @@ class ofApp : public ofBaseApp{
 		bool mouseIntersectPlane(ofVec3f planePoint, ofVec3f planeNorm, ofVec3f &point);
 		bool raySelectWithOctree(ofVec3f &pointRet);
 		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
+		float scoreCount(glm::vec3 pos);
 
 		ofCamera* theCam;
 		ofEasyCam cam;
@@ -102,6 +103,7 @@ class ofApp : public ofBaseApp{
 		ofTrueTypeFont verdana20;
 		string heightString = "";
 		string fuelString = "";
+		string scoreString = "";
 
 		// Lighting
 		vector<ofLight> lights;
@@ -128,6 +130,8 @@ class ofApp : public ofBaseApp{
 		bool bDisplayBBoxes = false;
 		bool touchDown = false;
 
+		float score = 0;
+
 		bool bThrustEmit = false;
 
 		bool start = false;
@@ -144,6 +148,8 @@ class ofApp : public ofBaseApp{
 
 		float startTime;
 		float finalTime;
+		float fuelStartTime;
+		float fuelFinalTime;
 
 		// Particle Emitters
 		ParticleEmitter thrustEmitter;

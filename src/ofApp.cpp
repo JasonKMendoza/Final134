@@ -13,6 +13,7 @@
 #include "ofApp.h"
 #include "Util.h"
 #include <glm/gtx/intersect.hpp>
+#include <cmath>
 
 
 //--------------------------------------------------------------
@@ -26,7 +27,7 @@ void ofApp::setup(){
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
 
-	theCam = &cam;
+	theCam = &trackingCam;
 
 	mountedCam.setNearClip(.1);
 
@@ -52,7 +53,7 @@ void ofApp::setup(){
 
 	if (lander.model.loadModel("geo/rocket.obj")) {
 		lander.model.setScaleNormalization(false);
-		lander.model.setPosition(9, 9, 9);
+		lander.model.setPosition(9, 25, 9);
 		cam.setPosition(10, 10, 10);
 		//cout << "number of meshes: " << lander.model.getNumMeshes() << endl;
 		bboxList.clear();
@@ -173,8 +174,8 @@ void ofApp::setup(){
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	if (!touchDown) {
-		lander.force += glm::vec3(0, -.1, 0);
+	if (!touchDown && start) {
+		lander.force += glm::vec3(0, -.5, 0);
 	}
 	//lander.angularForce += 1;
 	//lander.angle = 0;
@@ -189,11 +190,13 @@ void ofApp::update() {
 	glm::vec3 temp = lander.model.getPosition();
 	//if (theCam == &cam) cam.setPosition(temp.x + 10, temp.y + 10, temp.z + 10);
 
+	score = scoreCount(temp);
 	Vector3 temp2 = Vector3(temp.x, temp.y, temp.z);
 	Ray fromShip = Ray(temp2, Vector3(0, -1, 0));
 	octree.intersect(fromShip, octree.root, altitude);
 	fuelString = "Fuel Remaining: " + to_string(fuel);
 	heightString = "Current Altitude " + to_string(altitude);
+	scoreString = "Final Score: " + to_string(score);
 
 	ofVec3f min = lander.model.getSceneMin() + lander.model.getPosition();
 	ofVec3f max = lander.model.getSceneMax() + lander.model.getPosition();
@@ -204,9 +207,13 @@ void ofApp::update() {
 	octree.intersect(bounds, octree.root, colBoxList);
 
 	if (colBoxList.size() > 10) {
-		cout << "touchdown\n";
 		touchDown = true;
-		lander.velocity = glm::vec3(0,0,0);
+		if (lander.speed > 10) {
+			explode = true;
+		}
+		else {
+			lander.velocity = glm::vec3(0, 0, 0);
+		}
 		//lander.force += glm::vec3(0, .1, 0);
 	}
 	
@@ -350,6 +357,10 @@ void ofApp::draw() {
 	ofSetColor(ofColor::white);
 	verdana20.drawString(fuelString, ofGetWidth() - verdana20.stringWidth(fuelString) - 20, 2 * verdana20.stringHeight(fuelString));
 	verdana20.drawString(heightString, ofGetWidth() - verdana20.stringWidth(heightString) - 20, 4 * verdana20.stringHeight(heightString));
+
+	if (touchDown) {
+		verdana20.drawString(scoreString, ofGetWidth()/2 - verdana20.stringWidth(scoreString)/2, ofGetHeight() / 2);
+	}
 }
 
 
@@ -437,7 +448,7 @@ void ofApp::keyPressed(int key) {
 	case 'V':
 		break;
 	case ' ':
-		lander.force += glm::vec3(0, 1, 0);
+		lander.force += glm::vec3(0, 3, 0);
 		bThrustEmit = true;
 		break;
 	case 'w':
@@ -484,7 +495,7 @@ void ofApp::keyPressed(int key) {
 		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
-		lander.force += rightVector * glm::vec3(0, 1, 0);
+		lander.force += rightVector * glm::vec3(0, 0, 1);
 		break;
 	}
 	case OF_KEY_DOWN:   // go backward
@@ -492,7 +503,7 @@ void ofApp::keyPressed(int key) {
 		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
-		lander.force += rightVector * glm::vec3(0, -1, 0);
+		lander.force += rightVector * glm::vec3(0, 0, -1);
 		break;
 	}
 	case 'e': //turn right
@@ -500,6 +511,9 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'q': //turn left
 		lander.angularForce += -50;
+		break;
+	case '1': //turn left
+		lander.force += glm::vec3(0, -1, 0);
 		break;
 	case 'z':
 		start = !start;
@@ -835,4 +849,26 @@ glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 planePt, glm::vec3 planeNorm) {
 		return intersectPoint;
 	}
 	else return glm::vec3(0, 0, 0);
+}
+float ofApp::scoreCount(glm::vec3 pos) {
+	float score = 100;
+	float temp1 = sqrt(powf(pos.x- 57.6471, 2) + powf(pos.y - 17.7934, 2) + powf(pos.z - -38.8235, 2));
+	float temp2 = sqrt(powf(pos.x - -74.7059, 2) + powf(pos.y - 17.9984, 2) + powf(pos.z - -108.235, 2));
+	float temp3 = sqrt(powf(pos.x - 26.4706, 2) + powf(pos.y - 18.111, 2) + powf(pos.z - 99.4118, 2));
+	
+	//Distance to 1 is shortest
+	if (temp1 < temp2 && temp1 < temp3) {
+		return score - temp1;
+	}
+	//Distance to 2 is shortest
+	else if (temp2 < temp1 && temp2 < temp3) {
+		return score - temp2;
+	}
+	//Distance to 3 is shortest
+	else {
+		return score - temp3;
+	}
+	
+
+	return -1;
 }
