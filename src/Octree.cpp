@@ -47,7 +47,7 @@ Box Octree::meshBounds(const ofMesh & mesh) {
 		if (v.z > max.z) max.z = v.z;
 		else if (v.z < min.z) min.z = v.z;
 	}
-	cout << "vertices: " << n << endl;
+	//cout << "vertices: " << n << endl;
 //	cout << "min: " << min << "max: " << max << endl;
 	return Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
 }
@@ -210,19 +210,18 @@ bool Octree::intersect(const Ray &ray, const TreeNode & node, TreeNode & nodeRtn
 	return intersects;
 }
 
-bool Octree::intersect(const Ray& ray, const TreeNode& node, TreeNode& nodeRtn, float& distance) {
+bool Octree::intersect(const Ray& ray, const TreeNode& node, float& distance) {
 	bool intersects = false;
 
 	if (!node.children.empty()) {
 		for (int i = 0; i < node.children.size(); i++) {
-			if (intersect(ray, node.children[i], nodeRtn, distance)) {
+			if (intersect(ray, node.children[i], distance)) {
 				return true;
 			}
 		}
 	}
 	else {
 		if (node.box.intersect(ray, 0, 1000)) {
-			nodeRtn = node;
 			intersects = true;
 
 			Vector3 min = node.box.parameters[0];

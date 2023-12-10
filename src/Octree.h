@@ -28,7 +28,7 @@ public:
 	void create(const ofMesh & mesh, int numLevels);
 	void subdivide(const ofMesh & mesh, TreeNode & node, int numLevels, int level);
 	bool intersect(const Ray &, const TreeNode & node, TreeNode & nodeRtn);
-	bool intersect(const Ray&, const TreeNode& node, TreeNode& nodeRtn, float& distance);
+	bool intersect(const Ray&, const TreeNode& node, float& distance);
 	bool intersect(const Box &, TreeNode & node, vector<Box> & boxListRtn);
 	void draw(TreeNode & node, int numLevels, int level);
 	void draw(int numLevels, int level) {
