@@ -5,6 +5,8 @@
 #include  "ofxAssimpModelLoader.h"
 #include "Octree.h"
 #include <cmath>
+#include "Particle.h"
+#include "ParticleEmitter.h"
 
 class physicsModel {
 public:
@@ -73,7 +75,11 @@ class ofApp : public ofBaseApp{
 		bool raySelectWithOctree(ofVec3f &pointRet);
 		glm::vec3 ofApp::getMousePointOnPlane(glm::vec3 p , glm::vec3 n);
 
+		ofCamera* theCam;
 		ofEasyCam cam;
+		ofCamera trackingCam;
+		ofCamera mountedCam;
+
 		ofxAssimpModelLoader skybox;
 		ofxAssimpModelLoader mars;
 		physicsModel lander;
@@ -109,6 +115,8 @@ class ofApp : public ofBaseApp{
 		bool bDisplayLeafNodes = false;
 		bool bDisplayOctree = false;
 		bool bDisplayBBoxes = false;
+
+		bool bThrustEmit = false;
 		
 		//bool true;
 		bool bTerrainSelected;
@@ -122,4 +130,15 @@ class ofApp : public ofBaseApp{
 
 		float startTime;
 		float finalTime;
+
+		// Particle Emitters
+		ParticleEmitter thrustEmitter;
+		ofxFloatSlider tGravity;
+		ofxFloatSlider tDamping;
+		ofxFloatSlider tRadius;
+		ofxVec3Slider tVelocity;
+		ofxFloatSlider tLifespan;
+		ofxFloatSlider tRate;
+		ofxVec3Slider tTurbulenceMin;
+		ofxVec3Slider tTurbulenceMax;
 };
