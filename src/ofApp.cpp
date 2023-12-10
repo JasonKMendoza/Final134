@@ -176,12 +176,16 @@ void ofApp::update() {
 	//lander.force += glm::vec3(0,.1,0);
 	//lander.angularForce += 1;
 	//lander.angle = 0;
-	lander.heading = glm::vec3(sin(glm::radians(lander.angle)), 0, -cos(glm::radians(lander.angle)));
+	ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
+	ofVec3f upVector = rotationMatrix.getRowAsVec3f(1);
+	upVector.normalize();
+	lander.heading = upVector;
+	//lander.heading = glm::vec3(sin(glm::radians(lander.angle)), 0, -cos(glm::radians(lander.angle)));
 	//lander.force += lander.heading * .1;
 	
 
 	glm::vec3 temp = lander.model.getPosition();
-	cam.setPosition(temp.x + 10, temp.y + 10, temp.z + 10);
+	//if (theCam == &cam) cam.setPosition(temp.x + 10, temp.y + 10, temp.z + 10);
 
 	Vector3 temp2 = Vector3(temp.x, temp.y, temp.z);
 	Ray fromShip = Ray(temp2, Vector3(0, -1, 0));
@@ -223,8 +227,8 @@ void ofApp::update() {
 	if (theCam == &trackingCam) {
 		theCam->lookAt(lander.model.getPosition());
 	} else if (theCam == &mountedCam) {
-		theCam->lookAt(glm::vec3(1, 0, 0));
-		theCam->setPosition(lander.model.getPosition());
+		theCam->lookAt(glm::vec3(lander.model.getPosition().x, lander.model.getPosition().y - 1,lander.model.getPosition().z));
+		theCam->setPosition(lander.model.getPosition() + glm::vec3(1, 12, 1));
 	}
 
 	if (start) lander.integrate();
@@ -407,6 +411,7 @@ void ofApp::keyPressed(int key) {
 		savePicture();
 		break;
 	case 't':
+		isTarget = !isTarget;
 		setCameraTarget();
 		break;
 	case 'u':
@@ -455,11 +460,21 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_F3:
 		theCam = &mountedCam;
 	case OF_KEY_LEFT:   // turn left
-		lander.force += lander.heading * glm::vec3(-100,0,-100);
+	{
+		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
+		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
+		rightVector.normalize();
+		lander.force += rightVector * glm::vec3(-1, 0, -1);
 		break;
+	}
 	case OF_KEY_RIGHT:  // turn right
-		lander.force += lander.heading * glm::vec3(100, 0, 100);
+	{
+		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
+		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
+		rightVector.normalize();
+		lander.force += rightVector * glm::vec3(1, 0, 1);
 		break;
+	}
 	case OF_KEY_UP:     // go forward
 		lander.force += lander.heading * glm::vec3(0, 1, 0);
 		break;
@@ -610,7 +625,12 @@ void ofApp::mouseReleased(int x, int y, int button) {
 // Set the camera to use the selected point as it's new target
 //  
 void ofApp::setCameraTarget() {
-
+	if (theCam == &cam) {
+		if (isTarget)
+			theCam->lookAt(lander.model.getPosition());
+		else
+			theCam->lookAt(glm::vec3(0, 0, 0));
+	}
 }
 
 
