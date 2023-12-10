@@ -39,9 +39,9 @@ void ofApp::setup(){
 
 	if (lander.model.loadModel("geo/lander.obj")) {
 		lander.model.setScaleNormalization(false);
-		lander.model.setPosition(10, 10, 10);
-		cam.setPosition(9,9,9);
-		cout << "number of meshes: " << lander.model.getNumMeshes() << endl;
+		lander.model.setPosition(9, 9, 9);
+		cam.setPosition(10, 10, 10);
+		//cout << "number of meshes: " << lander.model.getNumMeshes() << endl;
 		bboxList.clear();
 		for (int i = 0; i < lander.model.getMeshCount(); i++) {
 			bboxList.push_back(Octree::meshBounds(lander.model.getMesh(i)));
@@ -128,11 +128,11 @@ void ofApp::setup(){
 	startTime = ofGetElapsedTimeMillis();
 	octree.create(mars.getMesh(0), 11);
 	finalTime = ofGetElapsedTimeMillis() - startTime;
-	cout << finalTime << " ms\n";
+	//cout << finalTime << " ms\n";
 	
-	cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
+	//cout << "Number of Verts: " << mars.getMesh(0).getNumVertices() << endl;
 
-	testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
+	//testBox = Box(Vector3(3, 3, 0), Vector3(5, 5, 2));
 	
 	
 	
@@ -142,15 +142,35 @@ void ofApp::setup(){
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	if (true) {
-		//lander.force += glm::vec3(0,.1,0);
-		//lander.angularForce += 1;
-		lander.angle = 0;
-		//glm::vec3 heading = glm::vec3(sin(glm::radians(lander.angle)), 0, -cos(glm::radians(lander.angle)));
-		//lander.force += heading * .1;
-		//lander.integrate();
-		//cout << lander.model.getPosition() << "\n";
+	//lander.force += glm::vec3(0,.1,0);
+	//lander.angularForce += 1;
+	//lander.angle = 0;
+	lander.heading = glm::vec3(sin(glm::radians(lander.angle)), 0, -cos(glm::radians(lander.angle)));
+	//lander.force += lander.heading * .1;
+	
+
+
+	ofVec3f min = lander.model.getSceneMin() + lander.model.getPosition();
+	ofVec3f max = lander.model.getSceneMax() + lander.model.getPosition();
+
+	Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
+
+	colBoxList.clear();
+	octree.intersect(bounds, octree.root, colBoxList);
+
+	glm::vec3 temp = lander.model.getPosition();
+	cam.setPosition(temp.x + 10,temp.y + 10,temp.z + 10);
+
+	Vector3 temp2 = Vector3(temp.x,temp.y,temp.z);
+	Ray fromShip = Ray(temp2, Vector3(0,-1,0));
+	octree.intersect(fromShip,octree.root,altitude);
+	if (colBoxList.size() > 1) {
+		//cout << "touch\n";
+		//lander.force += glm::vec3(0, .1, 0);
 	}
+	if (start) lander.integrate();
+	//cout << lander.angularVel << "\n";
+	//cout << altitude << '\n';
 }
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -267,15 +287,6 @@ void ofApp::draw() {
 
 	// if point selected, draw a sphere
 	//
-	if (pointSelected) {
-		ofVec3f p = octree.mesh.getVertex(selectedNode.points[0]);
-		lander.model.setPosition(p.x, p.y,p.z);
-		/*
-		ofVec3f d = p - cam.getPosition();
-		ofSetColor(ofColor::lightGreen);
-		ofDrawSphere(p, .02 * d.length());
-		*/
-	}
 
 	ofPopMatrix();
 	cam.end();
@@ -363,6 +374,10 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'V':
 		break;
+	case ' ':
+		start = !start;
+		cout << "go\n";
+		break;
 	case 'w':
 		toggleWireframeMode();
 		break;
@@ -376,6 +391,24 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_SHIFT:
 		break;
 	case OF_KEY_DEL:
+		break;
+	case OF_KEY_LEFT:   // turn left
+		lander.force += lander.heading * glm::vec3(-100,0,-100);
+		break;
+	case OF_KEY_RIGHT:  // turn right
+		lander.force += lander.heading * glm::vec3(100, 0, 100);
+		break;
+	case OF_KEY_UP:     // go forward
+		lander.force += lander.heading * glm::vec3(0, 1, 0);
+		break;
+	case OF_KEY_DOWN:   // go backward
+		lander.force += lander.heading * glm::vec3(0, -1, 0);
+		break;
+	case 'e':
+		lander.angularForce += 50;
+		break;
+	case 'q':
+		lander.angularForce += -50;
 		break;
 	default:
 		break;
@@ -472,7 +505,7 @@ bool ofApp::raySelectWithOctree(ofVec3f &pointRet) {
 	startTime = ofGetElapsedTimeMillis();
 	pointSelected = octree.intersect(ray, octree.root, selectedNode);
 	finalTime = ofGetElapsedTimeMillis() - startTime;
-	cout << finalTime << " ms\n";
+	//cout << finalTime << " ms\n";
 
 	if (pointSelected) {
 		pointRet = octree.mesh.getVertex(selectedNode.points[0]);
@@ -494,31 +527,6 @@ void ofApp::mouseDragged(int x, int y, int button) {
 	if (cam.getMouseInputEnabled()) return;
 
 	if (bInDrag) {
-
-		glm::vec3 landerPos = lander.model.getPosition();
-
-		glm::vec3 mousePos = getMousePointOnPlane(landerPos, cam.getZAxis());
-		glm::vec3 delta = mousePos - mouseLastPos;
-	
-		landerPos += delta;
-		lander.model.setPosition(landerPos.x, landerPos.y, landerPos.z);
-		mouseLastPos = mousePos;
-
-		ofVec3f min = lander.model.getSceneMin() + lander.model.getPosition();
-		ofVec3f max = lander.model.getSceneMax() + lander.model.getPosition();
-
-		Box bounds = Box(Vector3(min.x, min.y, min.z), Vector3(max.x, max.y, max.z));
-
-		colBoxList.clear();
-		octree.intersect(bounds, octree.root, colBoxList);
-	
-
-		/*if (bounds.overlap(testBox)) {
-			cout << "overlap" << endl;
-		}
-		else {
-			cout << "OK" << endl;
-		}*/
 
 
 	}

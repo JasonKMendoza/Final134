@@ -15,9 +15,10 @@ public:
 	float angularAccel = 0;
 	float angularForce = 0;
 	float mass = 1.0;
-	float damping = .99;
+	float damping = .80;
 	float angle = 0;
 	ofxAssimpModelLoader model;
+	glm::vec3 heading;
 
 	void integrate() {
 		float dt = 1.0 / ofGetFrameRate();
@@ -80,11 +81,15 @@ class ofApp : public ofBaseApp{
 		Box boundingBox, landerBounds;
 		Box testBox;
 		vector<Box> colBoxList;
-		bool bLanderSelected = true;
+		bool bLanderSelected = false;
 		Octree octree;
 		TreeNode selectedNode;
 		glm::vec3 mouseDownPos, mouseLastPos;
 		bool bInDrag = false;
+		map<int, bool> keymap;
+		int fuel = 120000;
+		bool explode = false;
+		float altitude = 0;
 
 		// Lighting
 		vector<ofLight> lights;
@@ -109,6 +114,7 @@ class ofApp : public ofBaseApp{
 		bool bDisplayLeafNodes = false;
 		bool bDisplayOctree = false;
 		bool bDisplayBBoxes = false;
+		bool start = false;
 		
 		//bool true;
 		bool bTerrainSelected;
