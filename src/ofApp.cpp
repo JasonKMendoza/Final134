@@ -211,7 +211,10 @@ void ofApp::update() {
 	glm::vec3 temp = lander.model.getPosition();
 	//if (theCam == &cam) cam.setPosition(temp.x + 10, temp.y + 10, temp.z + 10);
 
-	score = scoreCount(temp);
+	if (!explode) {
+		score = scoreCount(temp);
+
+	}
 	Vector3 temp2 = Vector3(temp.x, temp.y, temp.z);
 	Ray fromShip = Ray(temp2, Vector3(0, -1, 0));
 	octree.intersect(fromShip, octree.root, altitude);
@@ -229,16 +232,20 @@ void ofApp::update() {
 
 	if (colBoxList.size() > 10) {
 		touchDown = true;
-		if (lander.speed > 10) {
+		if (abs(lander.speed) > 1) {
 			explode = true;
-			lander.velocity = glm::vec3(0, 0, 0);
 		}
 		else {
 			lander.velocity = glm::vec3(0, 0, 0);
 		}
 		//lander.force += glm::vec3(0, .1, 0);
 	}
-	
+	if(explode){
+		explosionEmitter.setRate(tRate);
+		lander.velocity = glm::vec3(0, 0, 0);
+		score = 0;
+	}
+
 	// thrust particle emitter
 	thrustEmitter.setLifespan(tLifespan);
 	thrustEmitter.setVelocity(static_cast<ofVec3f>(tVelocity));
@@ -584,7 +591,7 @@ void ofApp::keyPressed(int key) {
 		bThrustEmit = true;
 		break;
 	case '1': //turn left
-		lander.force += glm::vec3(0, -1, 0);
+		lander.force += glm::vec3(0, -100, 0);
 		break;
 	case 'z':
 		start = !start;
