@@ -125,10 +125,18 @@ void ofApp::setup(){
 	light4.setSpecularColor(ofColor::mediumPurple);
 	light4.enable();
 
+	light5.setup();
+	light5.setPointLight();
+	light5.setAmbientColor(ofColor::yellow);
+	light5.setDiffuseColor(ofColor::yellow);
+	light5.setSpecularColor(ofColor::yellow);
+	light5.setAttenuation(1, 0.1, 0.1);
+
 	lights.push_back(light1);
 	lights.push_back(light2);
 	lights.push_back(light3);
 	lights.push_back(light4);
+	lights.push_back(light5);
 
 	// create sliders for testing
 	//
@@ -295,6 +303,9 @@ void ofApp::update() {
 	explosionEmitter.setParticleRadius(eRadius);
 	explosionEmitter.update();
 
+	// rocket lights
+	light5.setPosition(lander.model.getPosition() + glm::vec3(0, 4, 0));
+
 	if (theCam == &trackingCam) {
 		theCam->lookAt(lander.model.getPosition());
 	} else if (theCam == &mountedCam) {
@@ -340,6 +351,14 @@ void ofApp::draw() {
 		//	ofSetColor(l.getDiffuseColor());
 		//	l.draw();
 		//}
+		if (bThrustEmit) {
+			ofSetColor(light5.getDiffuseColor());
+			light5.enable();
+		} else {
+			ofSetColor(ofColor::black);
+			light5.disable();
+		}
+		ofDrawSphere(light5.getPosition(), 0.1);
 
 		ofSetColor(ofColor::white);
 		lander.model.drawFaces();
