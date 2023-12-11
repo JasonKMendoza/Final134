@@ -108,10 +108,12 @@ class ofApp : public ofBaseApp{
 
 		// Lighting
 		vector<ofLight> lights;
+		// landing zone lights
 		ofLight light1;
 		ofLight light2;
 		ofLight light3;
-		ofLight light4;
+		ofLight light4; // area light
+		ofLight light5; // mounted light
 
 		ofxIntSlider numLevels;
 		ofxPanel gui;
