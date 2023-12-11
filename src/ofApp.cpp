@@ -30,6 +30,8 @@ void ofApp::setup(){
 	engineSound.load("thrusters-loop.wav");
 	engineSound.setLoop(true);
 
+	explosionSound.load("explosion.wav");
+
 	theCam = &trackingCam;
 
 	mountedCam.setNearClip(.1);
@@ -242,6 +244,7 @@ void ofApp::update() {
 		touchDown = true;
 		if (abs(lander.speed) > 10 && !explode) {
 			explode = true;
+			if (!explosionSound.isPlaying()) explosionSound.play();
 			explosionEmitter.sys->reset();
 			explosionEmitter.start();
 		}

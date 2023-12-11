@@ -132,6 +132,7 @@ class ofApp : public ofBaseApp{
 		bool hover = false;
 
 		ofSoundPlayer engineSound;
+		ofSoundPlayer explosionSound;
 
 		float score = 0;
 
