@@ -240,7 +240,7 @@ void ofApp::update() {
 
 	if (colBoxList.size() > 10) {
 		touchDown = true;
-		if (abs(lander.speed) > 10) {
+		if (abs(lander.speed) > 10 && !explode) {
 			explode = true;
 			explosionEmitter.sys->reset();
 			explosionEmitter.start();
