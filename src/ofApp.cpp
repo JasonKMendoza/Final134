@@ -232,8 +232,10 @@ void ofApp::update() {
 
 	if (colBoxList.size() > 10) {
 		touchDown = true;
-		if (abs(lander.speed) > 1) {
+		if (abs(lander.speed) > 10) {
 			explode = true;
+			explosionEmitter.sys->reset();
+			explosionEmitter.start();
 		}
 		else {
 			lander.velocity = glm::vec3(0, 0, 0);
