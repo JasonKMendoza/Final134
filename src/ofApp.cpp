@@ -550,18 +550,18 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_UP:     // go forward
 	{
 		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
-		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
+		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(2);
 		rightVector.normalize();
-		lander.force += rightVector * glm::vec3(0, 0, 1);
+		lander.force += rightVector * glm::vec3(0, 0, -1);
 		bThrustEmit = true;
 		break;
 	}
 	case OF_KEY_DOWN:   // go backward
 	{
 		ofMatrix4x4 rotationMatrix = lander.model.getModelMatrix();
-		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
+		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(2);
 		rightVector.normalize();
-		lander.force += rightVector * glm::vec3(0, 0, -1);
+		lander.force += rightVector * glm::vec3(0, 0, 1);
 		bThrustEmit = true;
 		break;
 	}
