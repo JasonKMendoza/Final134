@@ -17,7 +17,7 @@ public:
 	float angularAccel = 0;
 	float angularForce = 0;
 	float mass = 1.0;
-	float damping = .80;
+	float damping = .70;
 	float angle = 0;
 	float speed = 0;
 	ofxAssimpModelLoader model;

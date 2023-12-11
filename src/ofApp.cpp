@@ -243,7 +243,11 @@ void ofApp::update() {
 	thrustEmitter.setPosition(lander.model.getPosition() + glm::vec3(0, 1, 0));
 	thrustEmitter.update();
 
-	if (bThrustEmit) thrustEmitter.setRate(tRate); else thrustEmitter.setRate(0);
+	if (bThrustEmit) {
+		thrustEmitter.setRate(tRate);
+		fuel--;
+	}
+	else thrustEmitter.setRate(0);
 
 	for (ParticleForce* force : thrustEmitter.sys->forces) {
 		if (dynamic_cast<GravityForce*>(force)) {
@@ -531,6 +535,7 @@ void ofApp::keyPressed(int key) {
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
 		lander.force += rightVector * glm::vec3(-1, 0, 0);
+		bThrustEmit = true;
 		break;
 	}
 	case OF_KEY_RIGHT:  // move right
@@ -539,6 +544,7 @@ void ofApp::keyPressed(int key) {
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
 		lander.force += rightVector * glm::vec3(1, 0, 0);
+		bThrustEmit = true;
 		break;
 	}
 	case OF_KEY_UP:     // go forward
@@ -547,6 +553,7 @@ void ofApp::keyPressed(int key) {
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
 		lander.force += rightVector * glm::vec3(0, 0, 1);
+		bThrustEmit = true;
 		break;
 	}
 	case OF_KEY_DOWN:   // go backward
@@ -555,13 +562,16 @@ void ofApp::keyPressed(int key) {
 		ofVec3f rightVector = rotationMatrix.getRowAsVec3f(0);
 		rightVector.normalize();
 		lander.force += rightVector * glm::vec3(0, 0, -1);
+		bThrustEmit = true;
 		break;
 	}
 	case 'e': //turn right
 		lander.angularForce += 50;
+		bThrustEmit = true;
 		break;
 	case 'q': //turn left
 		lander.angularForce += -50;
+		bThrustEmit = true;
 		break;
 	case '1': //turn left
 		lander.force += glm::vec3(0, -1, 0);
@@ -590,6 +600,23 @@ void ofApp::keyReleased(int key) {
 
 	switch (key) {
 	case ' ':
+		bThrustEmit = false;
+		break;
+	case OF_KEY_LEFT:   // move left
+	{
+	}
+	case OF_KEY_RIGHT:  // move right
+	{
+	}
+	case OF_KEY_UP:     // go forward
+	{
+	}
+	case OF_KEY_DOWN:   // go backward
+	{
+	}
+	case 'e': //turn right
+	case 'q': //turn left
+	case '1': //turn left
 		bThrustEmit = false;
 		break;
 	case OF_KEY_ALT:
