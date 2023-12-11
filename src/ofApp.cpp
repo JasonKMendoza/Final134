@@ -27,10 +27,10 @@ void ofApp::setup(){
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
 
-	engineSound.load("thrusters-loop.wav");
+	engineSound.load("sounds/thrusters-loop.wav");
 	engineSound.setLoop(true);
 
-	explosionSound.load("explosion.wav");
+	explosionSound.load("sounds/explosion.wav");
 
 	theCam = &trackingCam;
 
