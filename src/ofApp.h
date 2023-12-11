@@ -127,6 +127,9 @@ class ofApp : public ofBaseApp{
 		bool bDisplayOctree = false;
 		bool bDisplayBBoxes = false;
 		bool touchDown = false;
+		bool hover = false;
+
+		ofSoundPlayer engineSound;
 
 		float score = 0;
 

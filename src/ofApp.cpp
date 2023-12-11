@@ -27,6 +27,9 @@ void ofApp::setup(){
 	bTerrainSelected = true;
 //	ofSetWindowShape(1024, 768);
 
+	engineSound.load("thrusters-loop.wav");
+	engineSound.setLoop(true);
+
 	theCam = &trackingCam;
 
 	mountedCam.setNearClip(.1);
@@ -192,7 +195,7 @@ void ofApp::setup(){
 // incrementally update scene (animation)
 //
 void ofApp::update() {
-	if (!touchDown && start) {
+	if (!touchDown && start && !hover) {
 		lander.force += glm::vec3(0, -.5, 0);
 	}
 	//lander.angularForce += 1;
@@ -246,8 +249,12 @@ void ofApp::update() {
 	if (bThrustEmit) {
 		thrustEmitter.setRate(tRate);
 		fuel--;
+		if (!engineSound.isPlaying()) engineSound.play();
 	}
-	else thrustEmitter.setRate(0);
+	else {
+		thrustEmitter.setRate(0);
+		if (engineSound.isPlaying()) engineSound.stop();
+	}
 
 	for (ParticleForce* force : thrustEmitter.sys->forces) {
 		if (dynamic_cast<GravityForce*>(force)) {
@@ -497,6 +504,9 @@ void ofApp::keyPressed(int key) {
 		togglePointsDisplay();
 		break;
 	case 'V':
+		break;
+	case 'p':
+		hover = !hover;
 		break;
 	case ' ':
 		lander.force += glm::vec3(0, 3, 0);
