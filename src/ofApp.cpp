@@ -240,9 +240,11 @@ void ofApp::update() {
 	colBoxList.clear();
 	octree.intersect(bounds, octree.root, colBoxList);
 
+	glm::vec3 explosionPos;
 	if (colBoxList.size() > 10) {
 		touchDown = true;
 		if (abs(lander.speed) > 10 && !explode) {
+			glm::vec3 explosionPos = lander.model.getPosition();
 			explode = true;
 			if (!explosionSound.isPlaying()) explosionSound.play();
 			explosionEmitter.sys->reset();
@@ -253,9 +255,11 @@ void ofApp::update() {
 		}
 		//lander.force += glm::vec3(0, .1, 0);
 	}
-	if(explode){
-		explosionEmitter.setRate(tRate);
-		lander.velocity = glm::vec3(0, 0, 0);
+	if (explode) {
+		explosionEmitter.setRate(eRate);
+		explosionEmitter.setPosition(explosionPos);
+		lander.velocity = glm::vec3(100, 100, 100); // catapult lander away
+		lander.angularForce = 1000;
 		score = 0;
 	}
 
@@ -311,11 +315,13 @@ void ofApp::update() {
 	// rocket lights
 	light5.setPosition(lander.model.getPosition() + glm::vec3(0, 4, 0));
 
-	if (theCam == &trackingCam) {
-		theCam->lookAt(lander.model.getPosition());
-	} else if (theCam == &mountedCam) {
-		theCam->lookAt(glm::vec3(lander.model.getPosition().x, lander.model.getPosition().y - 1,lander.model.getPosition().z));
-		theCam->setPosition(lander.model.getPosition() + glm::vec3(1, 12, 1));
+	if (!explode) {
+		if (theCam == &trackingCam) {
+			theCam->lookAt(lander.model.getPosition());
+		} else if (theCam == &mountedCam) {
+			theCam->lookAt(glm::vec3(lander.model.getPosition().x, lander.model.getPosition().y - 1,lander.model.getPosition().z));
+			theCam->setPosition(lander.model.getPosition() + glm::vec3(1, 12, 1));
+		}
 	}
 
 	if (start) lander.integrate();
